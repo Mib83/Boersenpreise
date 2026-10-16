@@ -1,4 +1,4 @@
-# Börsenpreise · v0.0.2
+# Börsenpreise · v0.0.3
 
 Home-Assistant-Integration für deutsche Day-Ahead-Börsenstrompreise von ENTSO-E (Gebotszone DE-LU).
 
@@ -7,7 +7,7 @@ Home-Assistant-Integration für deutsche Day-Ahead-Börsenstrompreise von ENTSO-
 - Eigener Menüpunkt **Börsenpreise** in der linken Seitenleiste.
 - Tagesauswahl, Zurück/Weiter, Heute/Morgen; horizontal scrollbar auf kleinen Bildschirmen.
 - Echte 15-Minuten-Balken mit negativen Preisen und Einzelwerten als Tabelle.
-- Einstellbare Preisobergrenzen und drei frei wählbare Farben: standardmäßig bis einschließlich 5 ct/kWh grün, über 5 bis einschließlich 10 ct/kWh gelb, darüber rot. Negative Preise gehören zur ersten Stufe.
+- Beliebig erweiterbare Preisziele mit Obergrenze und Farbe: standardmäßig bis einschließlich 5 ct/kWh grün, über 5 bis einschließlich 10 ct/kWh gelb, darüber rot. Negative Preise gehören zur ersten Stufe.
 - Historischer Import ab **1. Oktober 2025** im Hintergrund, nach Neustart fortsetzbar. Fehlende/unvollständige Tage werden erneut versucht.
 - Lokale dauerhafte Historie in Home Assistants `.storage`, unabhängig vom Recorder.
 - Optional direkter Export einschließlich Historie nach **InfluxDB 2**.
@@ -45,7 +45,7 @@ Den Ordner `custom_components/boersenpreise` nach `/config/custom_components/boe
 
 ## InfluxDB 2
 
-Optional aktivieren, sobald die Datenbank bereitsteht. Benötigt werden Serveradresse (z. B. `http://192.168.1.20:8086`), Organisation, ein bereits angelegter Bucket und ein Token mit **Schreibrecht für diesen Bucket**. v0.0.2 liest die Tagesansicht aus dem lokalen Archiv; ein Leserecht für InfluxDB wird dafür nicht benötigt.
+Optional aktivieren, sobald die Datenbank bereitsteht. Benötigt werden Serveradresse (z. B. `http://192.168.1.20:8086`), Organisation, ein bereits angelegter Bucket und ein Token mit **Schreibrecht für diesen Bucket**. v0.0.3 liest die Tagesansicht aus dem lokalen Archiv; ein Leserecht für InfluxDB wird dafür nicht benötigt.
 
 Für eine vollständige Historie den Bucket ohne automatische Löschung anlegen. Bei HTTPS wird das Zertifikat geprüft. Die Datenbank muss von Home Assistant aus erreichbar sein; `localhost` bezeichnet bei Containern die jeweilige Containerumgebung.
 
@@ -63,8 +63,8 @@ Anzeige in **Europe/Berlin**, Speicherung in UTC. Normale Tage enthalten 96, Zei
 
 Konfiguration und Tokens liegen in Home Assistants lokalen Konfigurationseinträgen und können damit auch in Backups enthalten sein. Das Frontend erhält keine Tokens. Es wird nur eine Instanz für DE-LU unterstützt. Nach Änderung des Importstarts bleiben zuvor gespeicherte Daten erhalten.
 
-## Prüfung und Grenzen von v0.0.2
+## Prüfung und Grenzen von v0.0.3
 
-Lokale automatisierte Tests decken XML-Auflösung, negative Preise, Lücken, A03-Kurven, Umrechnung und Zeitumstellung ab. Der ENTSO-E-Abruf und die Auswertung wurden zusätzlich mit echten Antworten geprüft. Ein vollständiger Live-Test mit deiner InfluxDB und Home Assistant steht noch aus. Fehler bei der Einrichtung unterscheiden nun ENTSO-E und InfluxDB. Fehlerstatus und Importfortschritt sind im Panel sichtbar. Die Farben werden mit Hex-Codes `#RRGGBB` eingestellt. Individuelle zusätzliche Farbstufen sind in dieser Version nicht enthalten.
+Lokale automatisierte Tests decken XML-Auflösung, negative Preise, Lücken, A03-Kurven, Umrechnung und Zeitumstellung ab. Der ENTSO-E-Abruf und die Auswertung wurden zusätzlich mit echten Antworten geprüft. Ein vollständiger Live-Test mit deiner InfluxDB und Home Assistant steht noch aus. Fehler bei der Einrichtung unterscheiden nun ENTSO-E und InfluxDB. Fehlerstatus und Importfortschritt sind im Panel sichtbar. Unter **Konfigurieren → Preisziele (+ Hinzufügen)** lassen sich weitere Preisobergrenzen mit eigener Farbe hinzufügen, bearbeiten oder löschen. Die Grenzen werden automatisch aufsteigend sortiert; doppelte Grenzen werden abgelehnt. Farben werden mit Hex-Codes `#RRGGBB` eingestellt. Oberhalb der höchsten Grenze gilt die separat gewählte Farbe. Ohne Preisziele gilt diese Farbe für alle Preise. Die bisherigen Preisgrenzen und Farben werden beim Update übernommen. Positive Balken sind oben abgerundet, negative am unteren Ende. Der Erklärungstext steht im unteren Infofeld in kleinerer Schrift.
 
-Tests: `python3 -m unittest discover -s tests -v`
+Tests: `python3 -m unittest discover -s tests -v` und `node tests/test_panel.cjs`
