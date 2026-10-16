@@ -52,3 +52,32 @@ class SetupTests(unittest.IsolatedAsyncioTestCase):
         with patch.object(flow,'fetch_day',AsyncMock(return_value=[{'ts':1,'eur_mwh':10}])),patch.object(flow,'write_influx',write):
             await flow.validate(None,data)
         self.assertEqual(data['token'],'test-token'); write.assert_not_awaited()
+
+    async def test_color_picker_values_saved_without_losing_colors(self):
+        data={**DEFAULTS,'token':'test-token','high_color':[255,0,0],'low_limit':0,'low_color':[0,0,255],'price_levels':[{'limit':5,'color':[0,255,0]}]}
+        with patch.object(flow,'fetch_day',AsyncMock(return_value=[{'ts':1,'eur_mwh':10}])):
+            await flow.validate(None,data)
+        self.assertEqual(data['high_color'],'#ff0000')
+        self.assertEqual(data['low_color'],'#0000ff')
+        self.assertEqual(data['price_levels'],[{'limit':5.0,'color':'#00ff00'}])
+
+    async def test_schema_uses_picker_for_all_colors_and_converts_old_defaults(self):
+        defaults={}
+        def required(key,default):
+            defaults[key]=default
+            return key
+        selector_stubs={
+            'TextSelector':lambda config:config,
+            'TextSelectorConfig':lambda **kwargs:kwargs,
+            'TextSelectorType':types.SimpleNamespace(PASSWORD='password'),
+            'ColorRGBSelector':lambda:{'color_rgb':{}},
+            'ObjectSelector':lambda config:{'object':config},
+        }
+        with patch.multiple(flow.vol,Required=required,Schema=lambda fields:fields,Coerce=lambda kind:kind,create=True),patch.multiple(flow.selector,**selector_stubs,create=True):
+            fields=flow.schema(DEFAULTS)
+        self.assertEqual(fields['high_color'],{'color_rgb':{}})
+        self.assertEqual(fields['low_color'],{'color_rgb':{}})
+        self.assertEqual(fields['price_levels']['object']['fields']['color']['selector'],{'color_rgb':{}})
+        self.assertEqual(defaults['high_color'],[239,68,68])
+        self.assertEqual(defaults['low_color'],[34,197,94])
+        self.assertEqual(defaults['price_levels'][0]['color'],[34,197,94])

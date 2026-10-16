@@ -104,6 +104,27 @@ class PricesTest(unittest.TestCase):
     def test_removing_all_price_levels_is_allowed(self):
         self.assertEqual(prices.price_levels({**DEFAULTS,'price_levels':[]}),[])
 
+    def test_color_picker_roundtrip_and_existing_hex(self):
+        self.assertEqual(prices.color_hex([18,52,171]),'#1234ab')
+        self.assertEqual(prices.color_rgb('#1234AB'),[18,52,171])
+        self.assertEqual(prices.color_hex('#1234AB'),'#1234ab')
+        self.assertEqual(prices.price_levels({'price_levels':[{'limit':5,'color':[34,197,94]}]}),[{'limit':5.0,'color':'#22c55e'}])
+
+    def test_invalid_rgb_values_rejected(self):
+        for color in ([True,0,0],[256,0,0],[-1,0,0],[1.5,0,0],[0,0],None):
+            with self.assertRaises(ValueError):prices.color_hex(color)
+
+    def test_lower_cutoff_and_legacy_appearance(self):
+        self.assertEqual(prices.lower_price_rule(DEFAULTS),{'limit':0.0,'color':'#22c55e'})
+        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'green_limit':-5})['limit'],-5)
+        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'low_limit':0,'low_color':[0,0,255]}),{'limit':0.0,'color':'#0000ff'})
+        for cutoff in (6,float('nan'),True):
+            with self.assertRaises(ValueError):prices.lower_price_rule({**DEFAULTS,'low_limit':cutoff})
+
+    def test_lower_cutoff_without_targets(self):
+        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'price_levels':[],'low_limit':0,'low_color':'#0000ff'}),{'limit':0.0,'color':'#0000ff'})
+        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'price_levels':[]})['color'],DEFAULTS['high_color'])
+
     def test_unexpected_document_rejected(self):
         with self.assertRaises(ValueError): prices.parse_prices('<html/>')
 
