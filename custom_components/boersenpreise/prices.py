@@ -88,18 +88,9 @@ def color_rgb(value):
 
 
 def lower_price_rule(settings):
-    """Independent lower cutoff; old configurations retain their appearance."""
+    """The lower boundary is always the lowest price target."""
     levels = price_levels(settings)
-    first = levels[0]["limit"] if levels else 0.0
-    raw_limit = settings.get("low_limit", min(0.0, first))
-    try:
-        limit = float(raw_limit)
-    except (TypeError, ValueError):
-        raise ValueError("Ungültige Unterhalb-Preisgrenze") from None
-    if isinstance(raw_limit, bool) or not float("-inf") < limit < float("inf"):
-        raise ValueError("Ungültige Unterhalb-Preisgrenze")
-    if levels and limit > first:
-        raise ValueError("Die Unterhalb-Grenze darf nicht über dem niedrigsten Preisziel liegen")
+    limit = levels[0]["limit"] if levels else 0.0
     fallback = levels[0]["color"] if levels else settings["high_color"]
     return {"limit": limit, "color": color_hex(settings.get("low_color", fallback))}
 

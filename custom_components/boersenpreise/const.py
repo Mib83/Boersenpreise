@@ -1,7 +1,7 @@
 """Constants for Börsenpreise."""
 DOMAIN = "boersenpreise"
 NAME = "Börsenpreise"
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 ZONE = "10Y1001A1001A82H"
 START = "2025-10-01"
 DEFAULTS = {

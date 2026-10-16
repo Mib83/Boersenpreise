@@ -5,13 +5,15 @@ import probatio as vol
 from homeassistant.components import frontend, panel_custom, websocket_api
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import Platform
-from .const import DOMAIN, NAME, VERSION
+from .const import DOMAIN, NAME, VERSION, DEFAULTS
 from .coordinator import PriceArchive
+from .color_settings import color_options, merge_color_options
 
 
 async def async_setup(hass, config):
     hass.data.setdefault(DOMAIN, {})
     websocket_api.async_register_command(hass, ws_day)
+    websocket_api.async_register_command(hass, ws_colors)
     await hass.http.async_register_static_paths([
         StaticPathConfig(f"/{DOMAIN}/panel.js", str(Path(__file__).parent / "panel.js"), False)
     ])
@@ -37,6 +39,13 @@ async def async_setup_entry(hass, entry):
 
 
 async def async_options_updated(hass, entry):
+    archive = hass.data.get(DOMAIN, {}).get("archive")
+    settings = {**DEFAULTS, **entry.data, **entry.options}
+    connection_keys = ("token", "import_start", "influx_enabled", "influx_url", "influx_org", "influx_bucket", "influx_token")
+    if archive and all(archive.settings.get(key) == settings.get(key) for key in connection_keys):
+        archive.settings = settings
+        archive.notify()
+        return
     await hass.config_entries.async_reload(entry.entry_id)
 
 
@@ -63,3 +72,26 @@ async def ws_day(hass, connection, msg):
         connection.send_error(msg["id"], "not_loaded", "Integration nicht geladen")
         return
     connection.send_result(msg["id"], archive.snapshot(day))
+
+
+@websocket_api.websocket_command({vol.Required("type"): "boersenpreise/colors",
+                                   vol.Optional("settings"): dict})
+@websocket_api.require_admin
+@websocket_api.async_response
+async def ws_colors(hass, connection, msg):
+    """Read or update colors without exposing tokens or contacting services."""
+    archive = hass.data.get(DOMAIN, {}).get("archive")
+    if archive is None:
+        connection.send_error(msg["id"], "not_loaded", "Integration nicht geladen")
+        return
+    entry = archive.entry
+    if "settings" in msg:
+        try:
+            options = merge_color_options(entry.options, msg["settings"])
+        except (ValueError, TypeError):
+            connection.send_error(msg["id"], "invalid_settings", "Bitte eindeutige Preise, gültige Farben und mindestens eine Preiszone eingeben")
+            return
+        hass.config_entries.async_update_entry(entry, options=options)
+        # Keep the current view consistent while the entry reload is scheduled.
+        archive.settings.update(options)
+    connection.send_result(msg["id"], color_options(archive.settings))

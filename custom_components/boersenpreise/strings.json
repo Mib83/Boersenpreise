@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "title": "Börsenpreise einrichten",
-        "description": "Deutschland/Luxemburg · echte Viertelstundenpreise ab 01.10.2025. InfluxDB ist optional. Beim Verbindungstest wird bei aktivierter InfluxDB ein heutiger Preispunkt geschrieben.",
+        "description": "Deutschland/Luxemburg · Viertelstundenpreise ab 01.10.2025. InfluxDB ist optional; beim Verbindungstest wird ein heutiger Preispunkt geschrieben. Farben und Preis Zohnen nach der Einrichtung unter Börsenpreise → Einstellungen festlegen.\n\n[Farben und Preis Zohnen öffnen](/boersenpreise?settings=1)",
         "data": {
           "token": "ENTSO-E API-Token",
           "import_start": "Historischer Import ab (JJJJ-MM-TT)",
@@ -12,24 +12,15 @@
           "influx_url": "InfluxDB Serveradresse",
           "influx_org": "InfluxDB Organisation",
           "influx_bucket": "InfluxDB Bucket",
-          "influx_token": "InfluxDB API-Token",
-          "high_color": "Farbe oberhalb des höchsten Preisziels",
-          "price_levels": "Preisziele (+ Hinzufügen)",
-          "low_limit": "Unterhalb dieser Preisgrenze (ct/kWh)",
-          "low_color": "Farbe unterhalb dieser Preisgrenze"
+          "influx_token": "InfluxDB API-Token"
         },
-        "data_description": {
-          "price_levels": "Über Hinzufügen weitere Preisobergrenzen und Farben anlegen. Alle Farben haben einen Farbwähler. Grenzen werden automatisch aufsteigend sortiert.",
-          "low_limit": "Zum Beispiel 0: Negative Preise erhalten die Unterhalb-Farbe. Diese Grenze darf nicht über dem niedrigsten Preisziel liegen. Genau auf der Grenze gilt die Farbe des Preisziels.",
-          "low_color": "Farbe direkt mit dem Home-Assistant-Farbwähler auswählen.",
-          "high_color": "Gilt für Preise oberhalb des höchsten Preisziels."
-        }
+        "data_description": {}
       }
     },
     "error": {
       "invalid_auth": "Zugang abgelehnt. ENTSO-E- bzw. InfluxDB-Token prüfen.",
       "cannot_connect": "Verbindung oder Preisabruf fehlgeschlagen. Adressen und Verfügbarkeit prüfen.",
-      "invalid_settings": "Importstart, Farben und Preisgrenzen prüfen. Preisziele müssen eindeutig sein; die Unterhalb-Grenze darf nicht über dem niedrigsten Preisziel liegen. InfluxDB benötigt vollständige Zugangsdaten.",
+      "invalid_settings": "Importstart und Verbindungseinstellungen prüfen. InfluxDB benötigt vollständige Zugangsdaten.",
       "entsoe_invalid_auth": "ENTSO-E hat den Token abgelehnt. API-Freischaltung und Token prüfen.",
       "entsoe_cannot_connect": "ENTSO-E: Preisabruf oder Verarbeitung fehlgeschlagen. Verbindung und Verfügbarkeit prüfen. InfluxDB wurde noch nicht geprüft.",
       "entsoe_no_prices": "ENTSO-E ist erreichbar, liefert aber keine heutigen SDAC-Preise (Sequenz 1). Bitte später erneut versuchen. InfluxDB wurde noch nicht geprüft.",
@@ -43,8 +34,8 @@
   "options": {
     "step": {
       "init": {
-        "title": "Börsenpreise konfigurieren",
-        "description": "Deutschland/Luxemburg · echte Viertelstundenpreise ab 01.10.2025. InfluxDB ist optional. Beim Verbindungstest wird bei aktivierter InfluxDB ein heutiger Preispunkt geschrieben.",
+        "title": "Börsenpreise – Verbindungen",
+        "description": "Deutschland/Luxemburg · Viertelstundenpreise ab 01.10.2025. InfluxDB ist optional; beim Verbindungstest wird ein heutiger Preispunkt geschrieben. Farben und Preis Zohnen nach der Einrichtung unter Börsenpreise → Einstellungen festlegen.\n\n[Farben und Preis Zohnen öffnen](/boersenpreise?settings=1)",
         "data": {
           "token": "ENTSO-E API-Token",
           "import_start": "Historischer Import ab (JJJJ-MM-TT)",
@@ -52,24 +43,15 @@
           "influx_url": "InfluxDB Serveradresse",
           "influx_org": "InfluxDB Organisation",
           "influx_bucket": "InfluxDB Bucket",
-          "influx_token": "InfluxDB API-Token",
-          "high_color": "Farbe oberhalb des höchsten Preisziels",
-          "price_levels": "Preisziele (+ Hinzufügen)",
-          "low_limit": "Unterhalb dieser Preisgrenze (ct/kWh)",
-          "low_color": "Farbe unterhalb dieser Preisgrenze"
+          "influx_token": "InfluxDB API-Token"
         },
-        "data_description": {
-          "price_levels": "Über Hinzufügen weitere Preisobergrenzen und Farben anlegen. Alle Farben haben einen Farbwähler. Grenzen werden automatisch aufsteigend sortiert.",
-          "low_limit": "Zum Beispiel 0: Negative Preise erhalten die Unterhalb-Farbe. Diese Grenze darf nicht über dem niedrigsten Preisziel liegen. Genau auf der Grenze gilt die Farbe des Preisziels.",
-          "low_color": "Farbe direkt mit dem Home-Assistant-Farbwähler auswählen.",
-          "high_color": "Gilt für Preise oberhalb des höchsten Preisziels."
-        }
+        "data_description": {}
       }
     },
     "error": {
       "invalid_auth": "Zugang abgelehnt. ENTSO-E- bzw. InfluxDB-Token prüfen.",
       "cannot_connect": "Verbindung oder Preisabruf fehlgeschlagen. Adressen und Verfügbarkeit prüfen.",
-      "invalid_settings": "Importstart, Farben und Preisgrenzen prüfen. Preisziele müssen eindeutig sein; die Unterhalb-Grenze darf nicht über dem niedrigsten Preisziel liegen. InfluxDB benötigt vollständige Zugangsdaten.",
+      "invalid_settings": "Importstart und Verbindungseinstellungen prüfen. InfluxDB benötigt vollständige Zugangsdaten.",
       "entsoe_invalid_auth": "ENTSO-E hat den Token abgelehnt. API-Freischaltung und Token prüfen.",
       "entsoe_cannot_connect": "ENTSO-E: Preisabruf oder Verarbeitung fehlgeschlagen. Verbindung und Verfügbarkeit prüfen. InfluxDB wurde noch nicht geprüft.",
       "entsoe_no_prices": "ENTSO-E ist erreichbar, liefert aber keine heutigen SDAC-Preise (Sequenz 1). Bitte später erneut versuchen. InfluxDB wurde noch nicht geprüft.",
