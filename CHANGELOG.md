@@ -1,5 +1,9 @@
 # Änderungen
 
+## v0.0.5
+
+Kompakter Farbdialog unter Börsenpreise → Einstellungen mit gleich großen Farbfeldern, Beschriftungen Oberhalb des letzten Preises / Preis Zohnen / Unterhalb des niedrigsten Preises. Preis Zohnen absteigend anzeigen, bearbeiten, hinzufügen und löschen. Separates low_limit-Feld entfernt; Unterhalb orientiert sich am kleinsten Preisziel. Farben ohne Netzwerkprüfung und Import-Neustart speichern; bisherige Farben übernehmen. Verbindungseinstellungen bleiben unter Geräte & Dienste.
+
 ## v0.0.4
 
 Home-Assistant-Farbwähler für alle Preisziele sowie Unterhalb- und Oberhalb-Farbe. Neue separate Unterhalb-Preisgrenze, z. B. unter 0 ct/kWh. Bestehende Hex-Farben bleiben erhalten. Legende zeigt beide Außenbereiche und die Preisziele.

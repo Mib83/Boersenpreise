@@ -1,4 +1,4 @@
-# Börsenpreise · v0.0.4
+# Börsenpreise · v0.0.5
 
 Home-Assistant-Integration für deutsche Day-Ahead-Börsenstrompreise von ENTSO-E (Gebotszone DE-LU).
 
@@ -12,7 +12,7 @@ Home-Assistant-Integration für deutsche Day-Ahead-Börsenstrompreise von ENTSO-
 - Lokale dauerhafte Historie in Home Assistants `.storage`, unabhängig vom Recorder.
 - Optional direkter Export einschließlich Historie nach **InfluxDB 2**.
 - Sensoren für den aktuellen und nächsten Viertelstundenpreis in ct/kWh.
-- Einrichtung und spätere Änderungen unter **Einstellungen → Geräte & Dienste → Börsenpreise → Konfigurieren**; kein YAML nötig.
+- Verbindungen unter **Einstellungen → Geräte & Dienste → Börsenpreise → Konfigurieren**; Farben und Preis Zohnen im Menü **Börsenpreise → Einstellungen**. Kein YAML nötig.
 
 ## Voraussetzungen und Installation
 
@@ -45,7 +45,7 @@ Den Ordner `custom_components/boersenpreise` nach `/config/custom_components/boe
 
 ## InfluxDB 2
 
-Optional aktivieren, sobald die Datenbank bereitsteht. Benötigt werden Serveradresse (z. B. `http://192.168.1.20:8086`), Organisation, ein bereits angelegter Bucket und ein Token mit **Schreibrecht für diesen Bucket**. v0.0.4 liest die Tagesansicht aus dem lokalen Archiv; ein Leserecht für InfluxDB wird dafür nicht benötigt.
+Optional aktivieren, sobald die Datenbank bereitsteht. Benötigt werden Serveradresse (z. B. `http://192.168.1.20:8086`), Organisation, ein bereits angelegter Bucket und ein Token mit **Schreibrecht für diesen Bucket**. v0.0.5 liest die Tagesansicht aus dem lokalen Archiv; ein Leserecht für InfluxDB wird dafür nicht benötigt.
 
 Für eine vollständige Historie den Bucket ohne automatische Löschung anlegen. Bei HTTPS wird das Zertifikat geprüft. Die Datenbank muss von Home Assistant aus erreichbar sein; `localhost` bezeichnet bei Containern die jeweilige Containerumgebung.
 
@@ -63,8 +63,13 @@ Anzeige in **Europe/Berlin**, Speicherung in UTC. Normale Tage enthalten 96, Zei
 
 Konfiguration und Tokens liegen in Home Assistants lokalen Konfigurationseinträgen und können damit auch in Backups enthalten sein. Das Frontend erhält keine Tokens. Es wird nur eine Instanz für DE-LU unterstützt. Nach Änderung des Importstarts bleiben zuvor gespeicherte Daten erhalten.
 
-## Prüfung und Grenzen von v0.0.4
+## Prüfung und Grenzen von v0.0.5
 
-Lokale automatisierte Tests decken XML-Auflösung, negative Preise, Lücken, A03-Kurven, Umrechnung und Zeitumstellung ab. Der ENTSO-E-Abruf und die Auswertung wurden zusätzlich mit echten Antworten geprüft. Ein vollständiger Live-Test mit deiner InfluxDB und Home Assistant steht noch aus. Fehler bei der Einrichtung unterscheiden nun ENTSO-E und InfluxDB. Fehlerstatus und Importfortschritt sind im Panel sichtbar. Unter **Konfigurieren → Preisziele (+ Hinzufügen)** lassen sich weitere Preisobergrenzen mit eigener Farbe hinzufügen, bearbeiten oder löschen. Die Grenzen werden automatisch aufsteigend sortiert; doppelte Grenzen werden abgelehnt. Alle Farben werden mit dem eingebauten Home-Assistant-Farbwähler eingestellt. Bestehende Hex-Farben werden automatisch übernommen. Unterhalb einer separat einstellbaren Preisgrenze gilt die Unterhalb-Farbe (Beispiel: unter 0 ct/kWh blau). Die Unterhalb-Grenze darf nicht über dem niedrigsten Preisziel liegen. Genau auf der Unterhalb-Grenze gilt die Farbe des passenden Preisziels. Oberhalb des höchsten Preisziels gilt die Oberhalb-Farbe. Ohne Preisziele gilt unterhalb der Unterhalb-Grenze die Unterhalb-Farbe, ab dieser Grenze die Oberhalb-Farbe. Bei bestehenden Konfigurationen wird als Unterhalb-Grenze 0 oder das niedrigste negative Preisziel und dessen Farbe übernommen; dadurch bleibt die bisherige Darstellung erhalten. Die bisherigen Preisgrenzen und Farben werden beim Update übernommen. Positive Balken sind oben abgerundet, negative am unteren Ende. Der Erklärungstext steht im unteren Infofeld in kleinerer Schrift.
+Lokale automatisierte Tests decken XML-Auflösung, negative Preise, Lücken, A03-Kurven, Umrechnung und Zeitumstellung ab. Der ENTSO-E-Abruf und die Auswertung wurden zusätzlich mit echten Antworten geprüft. Ein vollständiger Live-Test mit deiner InfluxDB und Home Assistant steht noch aus. Fehler bei der Einrichtung unterscheiden nun ENTSO-E und InfluxDB. Fehlerstatus und Importfortschritt sind im Panel sichtbar. Unter **Börsenpreise → Einstellungen** öffnet sich ein kompakter Farbdialog. Von oben nach unten: **Oberhalb des letzten Preises**, **Preis Zohnen**, **Unterhalb des niedrigsten Preises**. Alle Farbfelder sind gleich groß (76 × 36 Pixel) und öffnen per Klick den nativen Farbwähler des Browsers, wie die bisherigen Farbfelder. Die Preis Zohnen werden von höchstem zu niedrigstem Preis angezeigt und beim Speichern automatisch sortiert. Mit **+ Hinzufügen** können weitere Zonen angelegt werden; jede Zone kann geändert oder entfernt werden. Mindestens eine Zone ist erforderlich. Die alten Farben werden übernommen.
+
+Das separate Feld `low_limit` entfällt. Ein früher gespeicherter Wert wird nicht mehr ausgewertet: Die Unterhalb-Farbe gilt strikt unter dem niedrigsten Preisziel, die Oberhalb-Farbe strikt über dem höchsten. Die bestehenden Obergrenzen-Regeln für die Zielfarben bleiben erhalten. Dadurch gilt die Farbe des kleinsten Preisziels genau auf dessen Preis; darüber bis zur nächsten Obergrenze gilt deren Farbe. Die Diagrammlegende zeigt diese Grenzen ausdrücklich an. Beim Wechsel von v0.0.4 kann sich daher die Farbgebung unterhalb des kleinsten Preisziels ändern, wenn die bisherige separate Unterhalb-Grenze niedriger lag.
+
+Der Farbdialog ist für Administratoren zugänglich und über den Link im Verbindungsdialog erreichbar. Farbänderungen speichern nur Farben und Preisziele; Tokens bleiben verborgen. Es wird dabei kein ENTSO-E-/InfluxDB-Verbindungstest ausgeführt und der historische Import nicht neu gestartet.
+ Die bisherigen Preisgrenzen und Farben werden beim Update übernommen. Positive Balken sind oben abgerundet, negative am unteren Ende. Der Erklärungstext steht im unteren Infofeld in kleinerer Schrift.
 
 Tests: `python3 -m unittest discover -s tests -v` und `node tests/test_panel.cjs`
