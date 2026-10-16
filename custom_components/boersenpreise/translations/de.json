@@ -13,18 +13,18 @@
           "influx_org": "InfluxDB Organisation",
           "influx_bucket": "InfluxDB Bucket",
           "influx_token": "InfluxDB API-Token",
-          "green_limit": "Erste Preisobergrenze (ct/kWh)",
-          "yellow_limit": "Zweite Preisobergrenze (ct/kWh)",
-          "green_color": "Farbe bis zur ersten Grenze (#RRGGBB)",
-          "yellow_color": "Farbe bis zur zweiten Grenze (#RRGGBB)",
-          "high_color": "Farbe oberhalb der zweiten Grenze (#RRGGBB)"
+          "high_color": "Farbe oberhalb des höchsten Preisziels (#RRGGBB)",
+          "price_levels": "Preisziele (+ Hinzufügen)"
+        },
+        "data_description": {
+          "price_levels": "Über Hinzufügen weitere Obergrenzen und Farben anlegen; bestehende Einträge bearbeiten oder löschen. Grenzen werden automatisch aufsteigend sortiert. Beispiel: bis 5 ct/kWh grün, bis 10 ct/kWh gelb."
         }
       }
     },
     "error": {
       "invalid_auth": "Zugang abgelehnt. ENTSO-E- bzw. InfluxDB-Token prüfen.",
       "cannot_connect": "Verbindung oder Preisabruf fehlgeschlagen. Adressen und Verfügbarkeit prüfen.",
-      "invalid_settings": "Importstart, Farbcodes und Preisgrenzen prüfen. Erste Grenze muss kleiner als die zweite sein; InfluxDB benötigt vollständige Zugangsdaten.",
+      "invalid_settings": "Importstart, Farbcodes und Preisziele prüfen. Preise müssen eindeutige, endliche Zahlen sein; Farben im Format #RRGGBB. InfluxDB benötigt vollständige Zugangsdaten.",
       "entsoe_invalid_auth": "ENTSO-E hat den Token abgelehnt. API-Freischaltung und Token prüfen.",
       "entsoe_cannot_connect": "ENTSO-E: Preisabruf oder Verarbeitung fehlgeschlagen. Verbindung und Verfügbarkeit prüfen. InfluxDB wurde noch nicht geprüft.",
       "entsoe_no_prices": "ENTSO-E ist erreichbar, liefert aber keine heutigen SDAC-Preise (Sequenz 1). Bitte später erneut versuchen. InfluxDB wurde noch nicht geprüft.",
@@ -48,18 +48,18 @@
           "influx_org": "InfluxDB Organisation",
           "influx_bucket": "InfluxDB Bucket",
           "influx_token": "InfluxDB API-Token",
-          "green_limit": "Erste Preisobergrenze (ct/kWh)",
-          "yellow_limit": "Zweite Preisobergrenze (ct/kWh)",
-          "green_color": "Farbe bis zur ersten Grenze (#RRGGBB)",
-          "yellow_color": "Farbe bis zur zweiten Grenze (#RRGGBB)",
-          "high_color": "Farbe oberhalb der zweiten Grenze (#RRGGBB)"
+          "high_color": "Farbe oberhalb des höchsten Preisziels (#RRGGBB)",
+          "price_levels": "Preisziele (+ Hinzufügen)"
+        },
+        "data_description": {
+          "price_levels": "Über Hinzufügen weitere Obergrenzen und Farben anlegen; bestehende Einträge bearbeiten oder löschen. Grenzen werden automatisch aufsteigend sortiert. Beispiel: bis 5 ct/kWh grün, bis 10 ct/kWh gelb."
         }
       }
     },
     "error": {
       "invalid_auth": "Zugang abgelehnt. ENTSO-E- bzw. InfluxDB-Token prüfen.",
       "cannot_connect": "Verbindung oder Preisabruf fehlgeschlagen. Adressen und Verfügbarkeit prüfen.",
-      "invalid_settings": "Importstart, Farbcodes und Preisgrenzen prüfen. Erste Grenze muss kleiner als die zweite sein; InfluxDB benötigt vollständige Zugangsdaten.",
+      "invalid_settings": "Importstart, Farbcodes und Preisziele prüfen. Preise müssen eindeutige, endliche Zahlen sein; Farben im Format #RRGGBB. InfluxDB benötigt vollständige Zugangsdaten.",
       "entsoe_invalid_auth": "ENTSO-E hat den Token abgelehnt. API-Freischaltung und Token prüfen.",
       "entsoe_cannot_connect": "ENTSO-E: Preisabruf oder Verarbeitung fehlgeschlagen. Verbindung und Verfügbarkeit prüfen. InfluxDB wurde noch nicht geprüft.",
       "entsoe_no_prices": "ENTSO-E ist erreichbar, liefert aber keine heutigen SDAC-Preise (Sequenz 1). Bitte später erneut versuchen. InfluxDB wurde noch nicht geprüft.",
