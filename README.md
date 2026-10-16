@@ -1,4 +1,4 @@
-# Börsenpreise · v0.0.1
+# Börsenpreise · v0.0.2
 
 Home-Assistant-Integration für deutsche Day-Ahead-Börsenstrompreise von ENTSO-E (Gebotszone DE-LU).
 
@@ -16,7 +16,7 @@ Home-Assistant-Integration für deutsche Day-Ahead-Börsenstrompreise von ENTSO-
 
 ## Voraussetzungen und Installation
 
-Home Assistant **2026.10 oder neuer**. Dies ist eine erste Version; Tests in einer laufenden Home-Assistant-Installation und mit echten Zugangsdaten stehen noch aus.
+Home Assistant **2026.10 oder neuer**. ENTSO-E wurde mit echten Daten geprüft. Ein vollständiger Test in einer laufenden Home-Assistant-Installation und mit InfluxDB steht noch aus.
 
 ### HACS
 
@@ -45,7 +45,7 @@ Den Ordner `custom_components/boersenpreise` nach `/config/custom_components/boe
 
 ## InfluxDB 2
 
-Optional aktivieren, sobald die Datenbank bereitsteht. Benötigt werden Serveradresse (z. B. `http://192.168.1.20:8086`), Organisation, ein bereits angelegter Bucket und ein Token mit **Schreibrecht für diesen Bucket**. v0.0.1 liest die Tagesansicht aus dem lokalen Archiv; ein Leserecht für InfluxDB wird dafür nicht benötigt.
+Optional aktivieren, sobald die Datenbank bereitsteht. Benötigt werden Serveradresse (z. B. `http://192.168.1.20:8086`), Organisation, ein bereits angelegter Bucket und ein Token mit **Schreibrecht für diesen Bucket**. v0.0.2 liest die Tagesansicht aus dem lokalen Archiv; ein Leserecht für InfluxDB wird dafür nicht benötigt.
 
 Für eine vollständige Historie den Bucket ohne automatische Löschung anlegen. Bei HTTPS wird das Zertifikat geprüft. Die Datenbank muss von Home Assistant aus erreichbar sein; `localhost` bezeichnet bei Containern die jeweilige Containerumgebung.
 
@@ -55,7 +55,7 @@ Schema: Measurement `boersenpreise`, Tag `zone=DE-LU`, Felder `eur_mwh` und `ct_
 
 ## Daten und Betriebsverhalten
 
-ENTSO-E-Abfrage: Dokumenttyp `A44`, In-/Out-Domain `10Y1001A1001A82H`, nur EUR/MWh und `PT15M`. Umrechnung: **EUR/MWh ÷ 10 = ct/kWh**. Es werden keine Stundenwerte künstlich in Viertelstunden aufgeteilt. A03-Kurven werden gemäß ihrer konstanten Abschnitte aufgelöst; echte A01-Lücken bleiben fehlend.
+ENTSO-E-Abfrage: Dokumenttyp `A44`, In-/Out-Domain `10Y1001A1001A82H`, explizit Day-Ahead-Vertrag `A01` und SDAC-Sequenz `1`, nur EUR/MWh und `PT15M`. Die separate EXAA-Preisreihe (Sequenz 2) wird nicht zugemischt oder als Ersatz verwendet. Umrechnung: **EUR/MWh ÷ 10 = ct/kWh**. Es werden keine Stundenwerte künstlich in Viertelstunden aufgeteilt. A03-Kurven werden gemäß ihrer konstanten Abschnitte aufgelöst; echte A01-Lücken bleiben fehlend.
 
 Heute und morgen werden alle 15 Minuten erneut angefragt. Fehlende Zukunftsdaten sind normal: Day-Ahead ist keine langfristige Prognose. Die historischen Tage werden mit gedrosselten Einzelabfragen importiert. Das kann bei der ersten Einrichtung mehrere Minuten dauern, bei Störungen länger. Der Fortschritt steht im Panel. Preise werden lokal dauerhaft gespeichert; regelmäßige Home-Assistant-Backups einschließen.
 
@@ -63,8 +63,8 @@ Anzeige in **Europe/Berlin**, Speicherung in UTC. Normale Tage enthalten 96, Zei
 
 Konfiguration und Tokens liegen in Home Assistants lokalen Konfigurationseinträgen und können damit auch in Backups enthalten sein. Das Frontend erhält keine Tokens. Es wird nur eine Instanz für DE-LU unterstützt. Nach Änderung des Importstarts bleiben zuvor gespeicherte Daten erhalten.
 
-## Prüfung und Grenzen von v0.0.1
+## Prüfung und Grenzen von v0.0.2
 
-Lokale automatisierte Tests decken XML-Auflösung, negative Preise, Lücken, A03-Kurven, Umrechnung und Zeitumstellung ab. Ein Live-Test mit neuem ENTSO-E-Token, deiner InfluxDB und Home Assistant ist vor produktiver Nutzung erforderlich. Fehlerstatus und Importfortschritt sind im Panel sichtbar. Die Farben werden mit Hex-Codes `#RRGGBB` eingestellt. Individuelle zusätzliche Farbstufen sind in dieser Version nicht enthalten.
+Lokale automatisierte Tests decken XML-Auflösung, negative Preise, Lücken, A03-Kurven, Umrechnung und Zeitumstellung ab. Der ENTSO-E-Abruf und die Auswertung wurden zusätzlich mit echten Antworten geprüft. Ein vollständiger Live-Test mit deiner InfluxDB und Home Assistant steht noch aus. Fehler bei der Einrichtung unterscheiden nun ENTSO-E und InfluxDB. Fehlerstatus und Importfortschritt sind im Panel sichtbar. Die Farben werden mit Hex-Codes `#RRGGBB` eingestellt. Individuelle zusätzliche Farbstufen sind in dieser Version nicht enthalten.
 
 Tests: `python3 -m unittest discover -s tests -v`
