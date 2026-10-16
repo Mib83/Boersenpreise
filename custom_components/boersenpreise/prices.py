@@ -29,6 +29,11 @@ def parse_prices(xml):
         raise ValueError("Unerwartete ENTSO-E-Antwort")
     result = {}
     for series in root.findall(".//TimeSeries"):
+        # DE-LU also publishes EXAA (sequence 2). Never mix it into SDAC.
+        sequence = series.findtext("classificationSequence_AttributeInstanceComponent.position")
+        contract = series.findtext("contract_MarketAgreement.type")
+        if sequence not in (None, "1") or contract not in (None, "A01"):
+            continue
         if series.findtext("currency_Unit.name") != "EUR" or series.findtext("price_Measure_Unit.name") != "MWH":
             raise ValueError("Unerwartete Währung oder Preiseinheit")
         curve = series.findtext("curveType", "A01")

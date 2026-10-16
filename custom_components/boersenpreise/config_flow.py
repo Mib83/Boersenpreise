@@ -27,14 +27,29 @@ def schema(values):
     return vol.Schema(fields)
 
 
+class ConfigurationError(Exception):
+    """A safe, translated error identifying the failing service."""
+
+
 async def validate(hass, data):
     validate_settings(data)
     session = async_get_clientsession(hass)
-    rows = await fetch_day(session, data["token"], datetime.now(BERLIN).date())
+    try:
+        rows = await fetch_day(session, data["token"].strip(), datetime.now(BERLIN).date())
+    except AccessError:
+        raise ConfigurationError("entsoe_invalid_auth") from None
+    except ConnectionError:
+        raise ConfigurationError("entsoe_cannot_connect") from None
     if not rows:
-        raise ConnectionError("Keine heutigen Preise erhalten")
+        raise ConfigurationError("entsoe_no_prices")
     if data["influx_enabled"]:
-        await write_influx(session, data, rows[:1])
+        try:
+            await write_influx(session, data, rows[:1])
+        except AccessError:
+            raise ConfigurationError("influx_invalid_auth") from None
+        except ConnectionError:
+            raise ConfigurationError("influx_cannot_connect") from None
+    data["token"] = data["token"].strip()
 
 
 class BoersenpreiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -47,10 +62,8 @@ class BoersenpreiseConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             try:
                 await validate(self.hass, user_input)
-            except AccessError:
-                errors["base"] = "invalid_auth"
-            except ConnectionError:
-                errors["base"] = "cannot_connect"
+            except ConfigurationError as err:
+                errors["base"] = str(err)
             except ValueError:
                 errors["base"] = "invalid_settings"
             else:
@@ -69,10 +82,8 @@ class BoersenpreiseOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             try:
                 await validate(self.hass, user_input)
-            except AccessError:
-                errors["base"] = "invalid_auth"
-            except ConnectionError:
-                errors["base"] = "cannot_connect"
+            except ConfigurationError as err:
+                errors["base"] = str(err)
             except ValueError:
                 errors["base"] = "invalid_settings"
             else:

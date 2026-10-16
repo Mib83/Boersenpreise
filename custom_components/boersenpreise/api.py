@@ -19,6 +19,8 @@ class ConnectionError(Exception):
 async def fetch_day(session, token, day):
     start, end = day_bounds(day)
     params = {"securityToken": token, "documentType": "A44", "in_Domain": ZONE,
+              "contract_MarketAgreement.type": "A01",
+              "classificationSequence_AttributeInstanceComponent.position": "1",
               "out_Domain": ZONE, "periodStart": start.strftime("%Y%m%d%H%M"),
               "periodEnd": end.strftime("%Y%m%d%H%M")}
     try:

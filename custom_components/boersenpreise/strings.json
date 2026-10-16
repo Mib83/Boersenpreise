@@ -24,7 +24,12 @@
     "error": {
       "invalid_auth": "Zugang abgelehnt. ENTSO-E- bzw. InfluxDB-Token prüfen.",
       "cannot_connect": "Verbindung oder Preisabruf fehlgeschlagen. Adressen und Verfügbarkeit prüfen.",
-      "invalid_settings": "Importstart, Farbcodes und Preisgrenzen prüfen. Erste Grenze muss kleiner als die zweite sein; InfluxDB benötigt vollständige Zugangsdaten."
+      "invalid_settings": "Importstart, Farbcodes und Preisgrenzen prüfen. Erste Grenze muss kleiner als die zweite sein; InfluxDB benötigt vollständige Zugangsdaten.",
+      "entsoe_invalid_auth": "ENTSO-E hat den Token abgelehnt. API-Freischaltung und Token prüfen.",
+      "entsoe_cannot_connect": "ENTSO-E: Preisabruf oder Verarbeitung fehlgeschlagen. Verbindung und Verfügbarkeit prüfen. InfluxDB wurde noch nicht geprüft.",
+      "entsoe_no_prices": "ENTSO-E ist erreichbar, liefert aber keine heutigen SDAC-Preise (Sequenz 1). Bitte später erneut versuchen. InfluxDB wurde noch nicht geprüft.",
+      "influx_invalid_auth": "ENTSO-E erfolgreich. InfluxDB hat den Zugriff abgelehnt: Token und Schreibrecht für diesen Bucket prüfen.",
+      "influx_cannot_connect": "ENTSO-E erfolgreich. InfluxDB-Schreibtest fehlgeschlagen: Serveradresse, Organisation, Bucket und Erreichbarkeit von Home Assistant aus prüfen."
     },
     "abort": {
       "already_configured": "Börsenpreise ist bereits eingerichtet."
@@ -54,7 +59,12 @@
     "error": {
       "invalid_auth": "Zugang abgelehnt. ENTSO-E- bzw. InfluxDB-Token prüfen.",
       "cannot_connect": "Verbindung oder Preisabruf fehlgeschlagen. Adressen und Verfügbarkeit prüfen.",
-      "invalid_settings": "Importstart, Farbcodes und Preisgrenzen prüfen. Erste Grenze muss kleiner als die zweite sein; InfluxDB benötigt vollständige Zugangsdaten."
+      "invalid_settings": "Importstart, Farbcodes und Preisgrenzen prüfen. Erste Grenze muss kleiner als die zweite sein; InfluxDB benötigt vollständige Zugangsdaten.",
+      "entsoe_invalid_auth": "ENTSO-E hat den Token abgelehnt. API-Freischaltung und Token prüfen.",
+      "entsoe_cannot_connect": "ENTSO-E: Preisabruf oder Verarbeitung fehlgeschlagen. Verbindung und Verfügbarkeit prüfen. InfluxDB wurde noch nicht geprüft.",
+      "entsoe_no_prices": "ENTSO-E ist erreichbar, liefert aber keine heutigen SDAC-Preise (Sequenz 1). Bitte später erneut versuchen. InfluxDB wurde noch nicht geprüft.",
+      "influx_invalid_auth": "ENTSO-E erfolgreich. InfluxDB hat den Zugriff abgelehnt: Token und Schreibrecht für diesen Bucket prüfen.",
+      "influx_cannot_connect": "ENTSO-E erfolgreich. InfluxDB-Schreibtest fehlgeschlagen: Serveradresse, Organisation, Bucket und Erreichbarkeit von Home Assistant aus prüfen."
     }
   }
 }
