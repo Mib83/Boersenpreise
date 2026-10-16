@@ -6,7 +6,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import DOMAIN, NAME, DEFAULTS
-from .prices import validate_settings, BERLIN
+from .prices import validate_settings, price_levels, BERLIN
 from .api import fetch_day, write_influx, AccessError, ConnectionError
 
 
@@ -14,6 +14,8 @@ def schema(values):
     fields = {vol.Required("token", default=values.get("token", "")): selector.TextSelector(
         selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD))}
     for key, default in DEFAULTS.items():
+        if key in ("green_limit", "yellow_limit", "green_color", "yellow_color"):
+            continue
         value = values.get(key, default)
         field = vol.Required(key, default=value)
         if key == "influx_token":
@@ -24,6 +26,18 @@ def schema(values):
             fields[field] = vol.Coerce(float)
         else:
             fields[field] = str
+    level_defaults = values["price_levels"] if "price_levels" in values else price_levels({**DEFAULTS, **values})
+    fields[vol.Required("price_levels", default=level_defaults)] = selector.ObjectSelector({
+        "multiple": True,
+        "label_field": "limit",
+        "description_field": "color",
+        "fields": {
+            "limit": {"label": "Preisobergrenze", "required": True,
+                      "selector": {"number": {"mode": "box", "step": "any", "unit_of_measurement": "ct/kWh"}}},
+            "color": {"label": "Farbe (#RRGGBB)", "required": True, "default": "#22c55e",
+                      "selector": {"text": {}}},
+        },
+    })
     return vol.Schema(fields)
 
 
@@ -32,7 +46,9 @@ class ConfigurationError(Exception):
 
 
 async def validate(hass, data):
+    data.update({**DEFAULTS, **data})
     validate_settings(data)
+    data["price_levels"] = price_levels(data)
     session = async_get_clientsession(hass)
     try:
         rows = await fetch_day(session, data["token"].strip(), datetime.now(BERLIN).date())

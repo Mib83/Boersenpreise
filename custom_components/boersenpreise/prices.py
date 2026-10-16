@@ -73,14 +73,43 @@ def influx_lines(rows):
     )
 
 
+def price_levels(settings):
+    """Normalize dynamic levels, preserving pre-v0.0.3 configuration."""
+    levels = settings.get("price_levels")
+    if levels is None:
+        levels = [{"limit": settings["green_limit"], "color": settings["green_color"]},
+                  {"limit": settings["yellow_limit"], "color": settings["yellow_color"]}]
+    if not isinstance(levels, list):
+        raise ValueError("Preisziele müssen eine Liste sein")
+    normalized = []
+    for level in levels:
+        if not isinstance(level, dict) or set(level) != {"limit", "color"}:
+            raise ValueError("Jedes Preisziel benötigt Preis und Farbe")
+        try:
+            limit = float(level["limit"])
+        except (ValueError, TypeError):
+            raise ValueError("Ungültiges Preisziel") from None
+        color = level["color"]
+        if isinstance(level["limit"], bool) or not float("-inf") < limit < float("inf"):
+            raise ValueError("Ungültiges Preisziel")
+        if not isinstance(color, str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
+            raise ValueError("Farben bitte als #RRGGBB eingeben")
+        normalized.append({"limit": limit, "color": color.lower()})
+    normalized.sort(key=lambda level: level["limit"])
+    if len({level["limit"] for level in normalized}) != len(normalized):
+        raise ValueError("Preisziele dürfen nicht doppelt vorkommen")
+    return normalized
+
+
 def validate_settings(settings):
     from .const import START
     start = date.fromisoformat(settings["import_start"])
     if start < date.fromisoformat(START) or start > datetime.now(BERLIN).date():
         raise ValueError("Importstart muss zwischen 01.10.2025 und heute liegen")
     low, high = float(settings["green_limit"]), float(settings["yellow_limit"])
-    if not (float("-inf") < low < high < float("inf")):
+    if "price_levels" not in settings and not (float("-inf") < low < high < float("inf")):
         raise ValueError("Die erste Farbgrenze muss kleiner als die zweite sein")
+    price_levels(settings)
     for key in ("green_color", "yellow_color", "high_color"):
         if not re.fullmatch(r"#[0-9a-fA-F]{6}", settings[key]):
             raise ValueError("Farben bitte als #RRGGBB eingeben")
