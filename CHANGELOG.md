@@ -1,5 +1,9 @@
 # Änderungen
 
+## v0.0.4
+
+Home-Assistant-Farbwähler für alle Preisziele sowie Unterhalb- und Oberhalb-Farbe. Neue separate Unterhalb-Preisgrenze, z. B. unter 0 ct/kWh. Bestehende Hex-Farben bleiben erhalten. Legende zeigt beide Außenbereiche und die Preisziele.
+
 ## v0.0.3
 
 Preisziele mit beliebig vielen Obergrenzen und Farben über Hinzufügen, Bearbeiten und Löschen in den Integrationseinstellungen. Bisherige Einstellungen bleiben erhalten. Balken am äußeren Ende abgerundet; Erklärungstext ins untere Infofeld verschoben und Infofeld-Schrift verkleinert.
