@@ -37,6 +37,28 @@ class PricesTest(unittest.TestCase):
         rows=prices.parse_prices(document([(1,50),(3,-10)],'A03'))
         self.assertEqual([r['eur_mwh'] for r in rows],[50,50,-10,-10])
 
+    def test_mixed_sequences_select_sdac_regardless_of_order(self):
+        import xml.etree.ElementTree as ET
+        first=ET.fromstring(document([(1,50)],'A03'))
+        first_series=first[0]
+        ns='{urn:test}'
+        ET.SubElement(first_series,ns+'classificationSequence_AttributeInstanceComponent.position').text='1'
+        second=ET.fromstring(document([(1,90)],'A03'))[0]
+        ET.SubElement(second,ns+'classificationSequence_AttributeInstanceComponent.position').text='2'
+        for series in ([second,first_series],[first_series,second]):
+            root=ET.Element('Publication_MarketDocument')
+            root.extend(series)
+            rows=prices.parse_prices(ET.tostring(root))
+            self.assertEqual([r['eur_mwh'] for r in rows],[50]*4)
+
+    def test_sequence_two_alone_is_not_a_substitute(self):
+        xml=document([(1,90)]).replace('<curveType>', '<classificationSequence_AttributeInstanceComponent.position>2</classificationSequence_AttributeInstanceComponent.position><curveType>')
+        self.assertEqual(prices.parse_prices(xml),[])
+
+    def test_intraday_contract_is_not_day_ahead(self):
+        xml=document([(1,90)]).replace('<curveType>', '<contract_MarketAgreement.type>A07</contract_MarketAgreement.type><curveType>')
+        self.assertEqual(prices.parse_prices(xml),[])
+
     def test_hourly_rejected(self):
         with self.assertRaises(ValueError): prices.parse_prices(document([(1,50)],resolution='PT60M'))
 

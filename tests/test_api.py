@@ -46,6 +46,8 @@ class ApiTests(unittest.IsolatedAsyncioTestCase):
         params=session.request[1]['params']
         self.assertEqual((params['periodStart'],params['periodEnd']),('202510252200','202510262300'))
         self.assertEqual(params['in_Domain'],params['out_Domain'])
+        self.assertEqual(params['contract_MarketAgreement.type'],'A01')
+        self.assertEqual(params['classificationSequence_AttributeInstanceComponent.position'],'1')
 
     async def test_influx_write(self):
         session=Session(Response(204))
