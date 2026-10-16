@@ -61,7 +61,7 @@ class SetupTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(data['low_color'],'#0000ff')
         self.assertEqual(data['price_levels'],[{'limit':5.0,'color':'#00ff00'}])
 
-    async def test_schema_uses_picker_for_all_colors_and_converts_old_defaults(self):
+    async def test_connections_form_has_no_color_or_lower_limit_fields(self):
         defaults={}
         def required(key,default):
             defaults[key]=default
@@ -70,14 +70,10 @@ class SetupTests(unittest.IsolatedAsyncioTestCase):
             'TextSelector':lambda config:config,
             'TextSelectorConfig':lambda **kwargs:kwargs,
             'TextSelectorType':types.SimpleNamespace(PASSWORD='password'),
-            'ColorRGBSelector':lambda:{'color_rgb':{}},
-            'ObjectSelector':lambda config:{'object':config},
         }
         with patch.multiple(flow.vol,Required=required,Schema=lambda fields:fields,Coerce=lambda kind:kind,create=True),patch.multiple(flow.selector,**selector_stubs,create=True):
             fields=flow.schema(DEFAULTS)
-        self.assertEqual(fields['high_color'],{'color_rgb':{}})
-        self.assertEqual(fields['low_color'],{'color_rgb':{}})
-        self.assertEqual(fields['price_levels']['object']['fields']['color']['selector'],{'color_rgb':{}})
-        self.assertEqual(defaults['high_color'],[239,68,68])
-        self.assertEqual(defaults['low_color'],[34,197,94])
-        self.assertEqual(defaults['price_levels'][0]['color'],[34,197,94])
+        self.assertIn('token',fields)
+        self.assertIn('influx_url',fields)
+        for key in ('high_color','low_color','low_limit','price_levels'):
+            self.assertNotIn(key,fields)

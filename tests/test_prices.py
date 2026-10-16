@@ -114,12 +114,11 @@ class PricesTest(unittest.TestCase):
         for color in ([True,0,0],[256,0,0],[-1,0,0],[1.5,0,0],[0,0],None):
             with self.assertRaises(ValueError):prices.color_hex(color)
 
-    def test_lower_cutoff_and_legacy_appearance(self):
-        self.assertEqual(prices.lower_price_rule(DEFAULTS),{'limit':0.0,'color':'#22c55e'})
+    def test_lower_cutoff_follows_lowest_target_and_ignores_removed_field(self):
+        self.assertEqual(prices.lower_price_rule(DEFAULTS),{'limit':5.0,'color':'#22c55e'})
         self.assertEqual(prices.lower_price_rule({**DEFAULTS,'green_limit':-5})['limit'],-5)
-        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'low_limit':0,'low_color':[0,0,255]}),{'limit':0.0,'color':'#0000ff'})
-        for cutoff in (6,float('nan'),True):
-            with self.assertRaises(ValueError):prices.lower_price_rule({**DEFAULTS,'low_limit':cutoff})
+        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'low_limit':0,'low_color':[0,0,255]}),{'limit':5.0,'color':'#0000ff'})
+        self.assertEqual(prices.lower_price_rule({**DEFAULTS,'low_limit':1000})['limit'],5)
 
     def test_lower_cutoff_without_targets(self):
         self.assertEqual(prices.lower_price_rule({**DEFAULTS,'price_levels':[],'low_limit':0,'low_color':'#0000ff'}),{'limit':0.0,'color':'#0000ff'})

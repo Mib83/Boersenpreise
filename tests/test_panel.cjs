@@ -26,3 +26,7 @@ for(const [price,color] of [[-0.01,'blue'],[0,'green'],[5,'green'],[5.01,'yellow
 assert.equal(context.priceColor(-1,[],'red',lower),'blue');
 assert.equal(context.priceColor(0,[],'red',lower),'red');
 console.log('Frontend: Unterhalb-Farbe, exakte Grenzwerte und Oberhalb-Farbe OK');
+const descending=context.sortedPriceZones([{limit:5,color:'#22c55e'},{limit:20,color:'#eab308'},{limit:-5,color:'#9333ea'}]);
+assert.equal(descending.map(row=>row.limit).join(','),'20,5,-5');
+for(const zones of [[],[{limit:5,color:'#22c55e'},{limit:5,color:'#eab308'}],[{limit:NaN,color:'#22c55e'}]])assert.throws(()=>context.sortedPriceZones(zones));
+console.log('Frontend: Preis Zohnen absteigend sortiert; doppelte und leere Ziele abgefangen');
