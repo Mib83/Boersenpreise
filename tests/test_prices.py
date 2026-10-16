@@ -87,6 +87,23 @@ class PricesTest(unittest.TestCase):
         for changes in ({'green_limit':10}, {'green_color':'red'}, {'import_start':'2025-09-30'}, {'influx_enabled':True}):
             with self.assertRaises(ValueError): prices.validate_settings({**DEFAULTS,**changes})
 
+    def test_legacy_price_levels_are_preserved(self):
+        levels=prices.price_levels({**DEFAULTS,'green_limit':-2,'yellow_limit':12,'green_color':'#112233'})
+        self.assertEqual(levels,[{'limit':-2.0,'color':'#112233'},{'limit':12.0,'color':'#eab308'}])
+
+    def test_dynamic_price_levels_are_sorted(self):
+        data={**DEFAULTS,'price_levels':[{'limit':20,'color':'#FF0000'},{'limit':-5,'color':'#00FF00'},{'limit':10,'color':'#FFFF00'}]}
+        self.assertEqual([level['limit'] for level in prices.price_levels(data)],[-5,10,20])
+        self.assertEqual(prices.price_levels(data)[0]['color'],'#00ff00')
+        prices.validate_settings(data)
+
+    def test_duplicate_or_invalid_price_levels_rejected(self):
+        for levels in ([{'limit':5,'color':'#123456'}]*2,[{'limit':float('nan'),'color':'#123456'}],[{'limit':True,'color':'#123456'}],[{'limit':5,'color':'red'}],[{'color':'#123456'}]):
+            with self.assertRaises(ValueError):prices.price_levels({**DEFAULTS,'price_levels':levels})
+
+    def test_removing_all_price_levels_is_allowed(self):
+        self.assertEqual(prices.price_levels({**DEFAULTS,'price_levels':[]}),[])
+
     def test_unexpected_document_rejected(self):
         with self.assertRaises(ValueError): prices.parse_prices('<html/>')
 
