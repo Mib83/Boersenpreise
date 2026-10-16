@@ -6,7 +6,7 @@ from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .const import DOMAIN, NAME, DEFAULTS
-from .prices import validate_settings, price_levels, BERLIN
+from .prices import validate_settings, price_levels, color_hex, color_rgb, lower_price_rule, BERLIN
 from .api import fetch_day, write_influx, AccessError, ConnectionError
 
 
@@ -17,8 +17,10 @@ def schema(values):
         if key in ("green_limit", "yellow_limit", "green_color", "yellow_color"):
             continue
         value = values.get(key, default)
-        field = vol.Required(key, default=value)
-        if key == "influx_token":
+        field = vol.Required(key, default=color_rgb(value) if key == "high_color" else value)
+        if key == "high_color":
+            fields[field] = selector.ColorRGBSelector()
+        elif key == "influx_token":
             fields[field] = selector.TextSelector(selector.TextSelectorConfig(type=selector.TextSelectorType.PASSWORD))
         elif isinstance(default, bool):
             fields[field] = bool
@@ -26,7 +28,16 @@ def schema(values):
             fields[field] = vol.Coerce(float)
         else:
             fields[field] = str
-    level_defaults = values["price_levels"] if "price_levels" in values else price_levels({**DEFAULTS, **values})
+    merged = {**DEFAULTS, **values}
+    level_defaults = values["price_levels"] if "price_levels" in values else price_levels(merged)
+    level_defaults = [{**level, "color": color_rgb(level["color"])} for level in level_defaults]
+    # Invalid thresholds must remain editable after form validation fails.
+    try:
+        lower = lower_price_rule(merged)
+    except ValueError:
+        lower = {"limit": values.get("low_limit", 0.0), "color": values.get("low_color", "#22c55e")}
+    fields[vol.Required("low_limit", default=lower["limit"])] = vol.Coerce(float)
+    fields[vol.Required("low_color", default=color_rgb(lower["color"]))] = selector.ColorRGBSelector()
     fields[vol.Required("price_levels", default=level_defaults)] = selector.ObjectSelector({
         "multiple": True,
         "label_field": "limit",
@@ -34,8 +45,8 @@ def schema(values):
         "fields": {
             "limit": {"label": "Preisobergrenze", "required": True,
                       "selector": {"number": {"mode": "box", "step": "any", "unit_of_measurement": "ct/kWh"}}},
-            "color": {"label": "Farbe (#RRGGBB)", "required": True, "default": "#22c55e",
-                      "selector": {"text": {}}},
+            "color": {"label": "Farbe", "required": True, "default": [34, 197, 94],
+                      "selector": {"color_rgb": {}}},
         },
     })
     return vol.Schema(fields)
@@ -49,6 +60,9 @@ async def validate(hass, data):
     data.update({**DEFAULTS, **data})
     validate_settings(data)
     data["price_levels"] = price_levels(data)
+    lower = lower_price_rule(data)
+    data["low_limit"], data["low_color"] = lower["limit"], lower["color"]
+    data["high_color"] = color_hex(data["high_color"])
     session = async_get_clientsession(hass)
     try:
         rows = await fetch_day(session, data["token"].strip(), datetime.now(BERLIN).date())

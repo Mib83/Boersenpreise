@@ -9,7 +9,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from .api import fetch_day, write_influx, AccessError, ConnectionError
 from .const import DEFAULTS, DOMAIN
-from .prices import BERLIN, complete_day, day_bounds, price_levels
+from .prices import BERLIN, complete_day, day_bounds, price_levels, lower_price_rule
 
 
 class PriceArchive:
@@ -102,6 +102,8 @@ class PriceArchive:
     def snapshot(self, day):
         settings = {k: self.settings[k] for k in ("green_limit", "yellow_limit", "green_color", "yellow_color", "high_color", "import_start")}
         settings["price_levels"] = price_levels(self.settings)
+        lower = lower_price_rule(self.settings)
+        settings["low_limit"], settings["low_color"] = lower["limit"], lower["color"]
         today = datetime.now(BERLIN).date()
         total = max(0, (today-date.fromisoformat(self.settings["import_start"])).days)
         complete = sum(1 for key, rows in self.days.items() if self.settings["import_start"] <= key < today.isoformat() and complete_day(key, rows))

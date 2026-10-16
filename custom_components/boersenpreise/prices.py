@@ -73,6 +73,37 @@ def influx_lines(rows):
     )
 
 
+def color_hex(value):
+    """Accept existing hex colors and Home Assistant RGB picker values."""
+    if isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value):
+        return value.lower()
+    if isinstance(value, list) and len(value) == 3 and all(type(v) is int and 0 <= v <= 255 for v in value):
+        return "#" + "".join(f"{v:02x}" for v in value)
+    raise ValueError("Ungültige Farbe")
+
+
+def color_rgb(value):
+    color = color_hex(value)
+    return [int(color[i:i+2], 16) for i in (1, 3, 5)]
+
+
+def lower_price_rule(settings):
+    """Independent lower cutoff; old configurations retain their appearance."""
+    levels = price_levels(settings)
+    first = levels[0]["limit"] if levels else 0.0
+    raw_limit = settings.get("low_limit", min(0.0, first))
+    try:
+        limit = float(raw_limit)
+    except (TypeError, ValueError):
+        raise ValueError("Ungültige Unterhalb-Preisgrenze") from None
+    if isinstance(raw_limit, bool) or not float("-inf") < limit < float("inf"):
+        raise ValueError("Ungültige Unterhalb-Preisgrenze")
+    if levels and limit > first:
+        raise ValueError("Die Unterhalb-Grenze darf nicht über dem niedrigsten Preisziel liegen")
+    fallback = levels[0]["color"] if levels else settings["high_color"]
+    return {"limit": limit, "color": color_hex(settings.get("low_color", fallback))}
+
+
 def price_levels(settings):
     """Normalize dynamic levels, preserving pre-v0.0.3 configuration."""
     levels = settings.get("price_levels")
@@ -89,12 +120,10 @@ def price_levels(settings):
             limit = float(level["limit"])
         except (ValueError, TypeError):
             raise ValueError("Ungültiges Preisziel") from None
-        color = level["color"]
+        color = color_hex(level["color"])
         if isinstance(level["limit"], bool) or not float("-inf") < limit < float("inf"):
             raise ValueError("Ungültiges Preisziel")
-        if not isinstance(color, str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", color):
-            raise ValueError("Farben bitte als #RRGGBB eingeben")
-        normalized.append({"limit": limit, "color": color.lower()})
+        normalized.append({"limit": limit, "color": color})
     normalized.sort(key=lambda level: level["limit"])
     if len({level["limit"] for level in normalized}) != len(normalized):
         raise ValueError("Preisziele dürfen nicht doppelt vorkommen")
@@ -110,9 +139,9 @@ def validate_settings(settings):
     if "price_levels" not in settings and not (float("-inf") < low < high < float("inf")):
         raise ValueError("Die erste Farbgrenze muss kleiner als die zweite sein")
     price_levels(settings)
+    lower_price_rule(settings)
     for key in ("green_color", "yellow_color", "high_color"):
-        if not re.fullmatch(r"#[0-9a-fA-F]{6}", settings[key]):
-            raise ValueError("Farben bitte als #RRGGBB eingeben")
+        color_hex(settings[key])
     if settings["influx_enabled"]:
         from urllib.parse import urlsplit
         url = urlsplit(settings["influx_url"])
