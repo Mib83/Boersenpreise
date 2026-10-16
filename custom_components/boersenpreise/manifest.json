@@ -1,0 +1,12 @@
+{
+  "domain": "boersenpreise",
+  "name": "Börsenpreise",
+  "version": "0.0.1",
+  "codeowners": ["@Mib83"],
+  "config_flow": true,
+  "dependencies": ["frontend", "http", "panel_custom", "websocket_api"],
+  "documentation": "https://github.com/Mib83/B-rsenpreise",
+  "issue_tracker": "https://github.com/Mib83/B-rsenpreise/issues",
+  "iot_class": "cloud_polling",
+  "requirements": []
+}
